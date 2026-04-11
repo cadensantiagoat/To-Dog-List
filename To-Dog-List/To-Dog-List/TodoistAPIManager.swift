@@ -12,7 +12,7 @@ class TodoistAPIManager {
     func fetchTasks(completion: @escaping (Result<[TodoistTask], Error>) -> Void) {
         guard let url = URL(string: baseURL + "tasks") else { return }
         
-        var request = URLRequest(url: rul)
+        var request = URLRequest(url: url)
         request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
