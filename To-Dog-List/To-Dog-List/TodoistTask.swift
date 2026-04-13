@@ -1,6 +1,6 @@
 import Foundation
 
-struct TodoistTask: Codable {
+struct TodoistTask: Codable, Sendable {
     let id: String
     let content: String
     let isCompleted: Bool
@@ -11,4 +11,8 @@ struct TodoistTask: Codable {
         case content
         case isCompleted = "is_completed"
     }
+}
+
+struct TaskResponse: Codable, Sendable {
+    let results: [TodoistTask]
 }

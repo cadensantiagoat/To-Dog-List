@@ -5,7 +5,7 @@ struct ContentView: View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
-                .forgroundColor(.accentColor)
+                .foregroundColor(.accentColor)
             Text("Testing Todoist API...")
         }
         .padding()
