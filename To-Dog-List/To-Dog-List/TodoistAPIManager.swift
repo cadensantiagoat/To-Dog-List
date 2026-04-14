@@ -7,7 +7,7 @@ class TodoistAPIManager {
     private let baseURL = "https://api.todoist.com/api/v1/"
     
     // Test Access Token
-    private let apiToken = Secrets.todoistAPIKey
+    private let apiToken = todoistAPIKey
     
     /// Fetches the user's active tasks from Todoist
     ///
@@ -51,5 +51,39 @@ class TodoistAPIManager {
                     completion(.failure(error))
             }        }
         task.resume()
+    }
+    
+    // MARK: - Create Task
+    func createTask(content: String, completion: @escaping (Result<TodoistTask, Error>) -> Void) {
+        guard let url = URL(string: baseURL + "tasks") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = ["content": content]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            guard let data = data else { return }
+            
+            // DEBUG: Print raw response
+            if let rawString = String(data: data, encoding: .utf8) {
+                print("RAW CREATE RESPONSE: \(rawString)")
+            }
+            
+            do {
+                let task = try JSONDecoder().decode(TodoistTask.self, from: data)
+                completion(.success(task))
+            } catch {
+                print("Decoding error: \(error)")
+                completion(.failure(error))
+            }
+        }.resume()
     }
 }
