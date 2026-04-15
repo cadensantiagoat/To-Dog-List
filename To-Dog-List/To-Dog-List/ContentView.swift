@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @State private var showErrorAlert = false
 
+    // MARK: - UI
     var body: some View {
         NavigationView {
             VStack {
@@ -92,6 +93,7 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Adding task
     private func addTask() {
         let trimmed = newTaskContent.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
@@ -111,6 +113,9 @@ struct ContentView: View {
             }
         }
     }
+    
+    // MARK: - Toggle where task is completed or not
+    
 }
 
 struct ContentView_Previews: PreviewProvider {

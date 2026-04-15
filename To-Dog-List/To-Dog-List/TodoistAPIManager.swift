@@ -9,11 +9,13 @@ class TodoistAPIManager {
     // Test Access Token
     private let apiToken = todoistAPIKey
     
+    // MARK: -Fetch the Tasks
     /// Fetches the user's active tasks from Todoist
     ///
     /// Use this function whenever you need to refresh the main task list. It automatically handles decoding the paginated v1 JSON response
     ///
     /// Returns a Result containing either an array of 'TodoistTask' objects on success, or an Error on failure
+    ///
     func fetchTasks(completion: @escaping (Result<[TodoistTask], Error>) -> Void) {
         guard let url = URL(string: baseURL + "tasks") else { return }
         
