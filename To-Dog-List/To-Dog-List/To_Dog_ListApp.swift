@@ -11,7 +11,7 @@ import SwiftUI
 struct To_Dog_ListApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
         }
     }
 }
