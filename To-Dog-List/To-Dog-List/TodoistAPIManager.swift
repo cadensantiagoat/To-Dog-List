@@ -88,4 +88,40 @@ class TodoistAPIManager {
             }
         }.resume()
     }
+    
+    // MARK: - Close Task (Mark as Complete)
+    func closeTask(id: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: baseURL + "tasks/\(id)/close") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                DispatchQueue.main.async { completion(.failure(error)) }
+                return
+            }
+            // Success: status code 204 No Content expected
+            DispatchQueue.main.async { completion(.success(())) }
+        }.resume()
+    }
+
+    // MARK: - Reopen Task (Mark as Incomplete)
+    func reopenTask(id: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: baseURL + "tasks/\(id)/reopen") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                DispatchQueue.main.async { completion(.failure(error)) }
+                return
+            }
+            DispatchQueue.main.async { completion(.success(())) }
+        }.resume()
+    }
+    
 }
