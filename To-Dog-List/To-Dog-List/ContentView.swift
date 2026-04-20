@@ -6,8 +6,8 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showErrorAlert = false
-
-    // MARK: - UI
+    @State private var togglingTaskId: String? = nil  // Track which task is being toggled
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -16,7 +16,7 @@ struct ContentView: View {
                     TextField("New task...", text: $newTaskContent)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disabled(isLoading)
-
+                    
                     Button(action: addTask) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
@@ -25,7 +25,7 @@ struct ContentView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top)
-
+                
                 // Task list
                 if isLoading && tasks.isEmpty {
                     Spacer()
@@ -42,6 +42,17 @@ struct ContentView: View {
                                 Spacer()
                             }
                             .contentShape(Rectangle())
+                            .onTapGesture {
+                                toggleCompletion(for: task)
+                            }
+                            .opacity(togglingTaskId == task.id ? 0.5 : 1.0)
+                            .overlay(
+                                Group {
+                                    if togglingTaskId == task.id {
+                                        ProgressView()
+                                    }
+                                }
+                            )
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -71,9 +82,9 @@ struct ContentView: View {
             Text(message)
         }
     }
-
+    
     // MARK: - Networking
-
+    
     private func loadTasks() async {
         await withCheckedContinuation { continuation in
             isLoading = true
@@ -92,12 +103,11 @@ struct ContentView: View {
             }
         }
     }
-
-    // MARK: - Adding task
+    
     private func addTask() {
         let trimmed = newTaskContent.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
-
+        
         isLoading = true
         TodoistAPIManager.shared.createTask(content: trimmed) { result in
             DispatchQueue.main.async {
@@ -114,8 +124,43 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Toggle where task is completed or not
-    
+    // MARK: Check if the task is marke as completed or not
+    private func toggleCompletion(for task: TodoistTask) {
+        guard togglingTaskId == nil else { return }  // Prevent concurrent toggles
+        
+        togglingTaskId = task.id
+        
+        let completion: (Result<Void, Error>) -> Void = { result in
+            DispatchQueue.main.async {
+                togglingTaskId = nil
+                switch result {
+                case .success:
+                    // Update local task state
+                    if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                        var updatedTask = tasks[index]
+                        // Create a new task with toggled isCompleted
+                        // Since TodoistTask is a struct, we need to re-create it
+                        // We'll use a temporary struct that matches the response
+                        let toggledTask = TodoistTask(
+                            id: updatedTask.id,
+                            content: updatedTask.content,
+                            isCompleted: !updatedTask.isCompleted
+                        )
+                        tasks[index] = toggledTask
+                    }
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                    showErrorAlert = true
+                }
+            }
+        }
+        
+        if task.isCompleted {
+            TodoistAPIManager.shared.reopenTask(id: task.id, completion: completion)
+        } else {
+            TodoistAPIManager.shared.closeTask(id: task.id, completion: completion)
+        }
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {

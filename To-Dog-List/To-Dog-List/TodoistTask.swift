@@ -29,6 +29,14 @@ struct TodoistTask: Codable, Sendable, Identifiable {
         // is_completed might be missing in create response; default to false
         self.isCompleted = try container.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
     }
+    
+    
+    // Add inside TodoistTask struct
+    init(id: String, content: String, isCompleted: Bool) {
+        self.id = id
+        self.content = content
+        self.isCompleted = isCompleted
+    }
 }
 
 struct TaskResponse: Codable, Sendable {
