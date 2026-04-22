@@ -124,4 +124,49 @@ class TodoistAPIManager {
         }.resume()
     }
     
+    // MARK: - Update Task
+    func updateTask(id: String, content: String, completion: @escaping (Result<TodoistTask, Error>) -> Void) {
+        guard let url = URL(string: baseURL + "tasks/\(id)") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = ["content": content]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async { completion(.failure(error)) }
+                return
+            }
+            guard let data = data else { return }
+            
+            do {
+                let updatedTask = try JSONDecoder().decode(TodoistTask.self, from: data)
+                DispatchQueue.main.async { completion(.success(updatedTask)) }
+            } catch {
+                DispatchQueue.main.async { completion(.failure(error)) }
+            }
+        }.resume()
+    }
+
+    // MARK: - Delete Task
+    func deleteTask(id: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: baseURL + "tasks/\(id)") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addValue("Bearer \(apiToken)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                DispatchQueue.main.async { completion(.failure(error)) }
+                return
+            }
+            DispatchQueue.main.async { completion(.success(())) }
+        }.resume()
+    }
+    
 }
