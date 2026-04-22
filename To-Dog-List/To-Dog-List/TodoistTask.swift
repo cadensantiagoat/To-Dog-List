@@ -5,13 +5,20 @@ struct TodoistTask: Codable, Sendable, Identifiable {
     let content: String
     let isCompleted: Bool
     
+    //MARK: Add inside TodoistTask struct
+    init(id: String, content: String, isCompleted: Bool) {
+        self.id = id
+        self.content = content
+        self.isCompleted = isCompleted
+    }
+    
     enum CodingKeys: String, CodingKey {
         case id
         case content
         case isCompleted = "is_completed"
     }
     
-    // Custom decoding for both id types and optional is_completed
+    //MARK: Custom decoding for both id types and optional is_completed
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -28,14 +35,6 @@ struct TodoistTask: Codable, Sendable, Identifiable {
         
         // is_completed might be missing in create response; default to false
         self.isCompleted = try container.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
-    }
-    
-    
-    // Add inside TodoistTask struct
-    init(id: String, content: String, isCompleted: Bool) {
-        self.id = id
-        self.content = content
-        self.isCompleted = isCompleted
     }
 }
 
