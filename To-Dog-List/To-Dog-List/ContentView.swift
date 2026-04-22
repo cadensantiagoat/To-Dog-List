@@ -40,52 +40,57 @@ struct TaskListView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                //MARK: Add new task input (as a card as well)
-                HStack {
-                    TextField("New task...", text: $newTaskContent)
-                        .textFieldStyle(.plain)
-                        .padding(12)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                    
-                    Button(action: addTask) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.accentColor)
-                    }
-                    .disabled(newTaskContent.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color(.systemBackground))
+            ZStack {
+                ColorSchemes.backgroundColor
+                    .ignoresSafeArea()
                 
-                Divider()
-                
-                // MARK: Task list
-                if isLoading && tasks.isEmpty {
-                    Spacer()
-                    ProgressView("Loading tasks…")
-                    Spacer()
-                } else {
-                    List {
-                        ForEach(tasks) { task in
-                            TaskCardView(
-                                task: task,
-                                isToggling: togglingTaskId == task.id,
-                                isDeleting: deletingTaskId == task.id,
-                                onToggle: { toggleCompletion(for: task) },
-                                onEdit: { startEditing(task) },
-                                onDelete: { deleteTask(task) }
-                            )
-                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
+                VStack(spacing: 0) {
+                    //MARK: Add new task input (as a card as well)
+                    HStack {
+                        TextField("New task...", text: $newTaskContent)
+                            .textFieldStyle(.plain)
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                        
+                        Button(action: addTask) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.accentColor)
                         }
+                        .disabled(newTaskContent.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
                     }
-                    .listStyle(.plain)
-                    .refreshable {
-                        await loadTasks()
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color(.systemBackground))
+                    
+                    Divider()
+                    
+                    // MARK: Task list
+                    if isLoading && tasks.isEmpty {
+                        Spacer()
+                        ProgressView("Loading tasks…")
+                        Spacer()
+                    } else {
+                        List {
+                            ForEach(tasks) { task in
+                                TaskCardView(
+                                    task: task,
+                                    isToggling: togglingTaskId == task.id,
+                                    isDeleting: deletingTaskId == task.id,
+                                    onToggle: { toggleCompletion(for: task) },
+                                    onEdit: { startEditing(task) },
+                                    onDelete: { deleteTask(task) }
+                                )
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                            }
+                        }
+                        .listStyle(.plain)
+                        .refreshable {
+                            await loadTasks()
+                        }
                     }
                 }
             }

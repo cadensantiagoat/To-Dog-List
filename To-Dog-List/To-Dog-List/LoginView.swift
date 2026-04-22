@@ -6,19 +6,13 @@ struct LoginView: View {
     @State private var errorMessage = ""
     @State private var isLoggedIn = false
     @State private var showError = false
-    
-    // Team color palette
-    let primaryColor = Color(hex: "#F7A325")
-    let secondaryColor = Color(hex: "#53D892")
-    let backgroundColor = Color(hex: "#1A1C2C")
-    let tertiaryColor = Color(hex: "#FFD18B")
 
     var body: some View {
         if isLoggedIn {
             ContentView()
         } else {
             ZStack {
-                backgroundColor
+                ColorSchemes.backgroundColor
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
@@ -34,11 +28,11 @@ struct LoginView: View {
                     Text("To-Dog List")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(primaryColor)
+                        .foregroundColor(ColorSchemes.primaryColor)
                     
                     Text("Do tasks. Win dogs. Collect 'em all.")
                         .font(.subheadline)
-                        .foregroundColor(tertiaryColor)
+                        .foregroundColor(ColorSchemes.tertiaryColor)
                     
                     Spacer().frame(height: 10)
                     
@@ -71,8 +65,8 @@ struct LoginView: View {
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(primaryColor)
-                            .foregroundColor(backgroundColor)
+                            .background(ColorSchemes.primaryColor)
+                            .foregroundColor(ColorSchemes.backgroundColor)
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
@@ -83,8 +77,8 @@ struct LoginView: View {
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(secondaryColor)
-                            .foregroundColor(backgroundColor)
+                            .background(ColorSchemes.secondaryColor)
+                            .foregroundColor(ColorSchemes.backgroundColor)
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)

@@ -13,63 +13,69 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                Image(systemName: "person.crop.circle.fill")
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(.orange)
-                    .padding(.top, 20)
-
-                if let user = user {
-                    Text(user.username)
-                        .font(.title)
-                        .fontWeight(.bold)
+            ZStack {
+                ColorSchemes.backgroundColor
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 24) {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .foregroundColor(ColorSchemes.primaryColor)
+                        .padding(.top, 20)
                     
-                    
-                    // Levels + Exp of User
-                    VStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Level \(user.level)")
-                                    .fontWeight(.semibold)
-                                Spacer()
-                                Text("Next: Level \(user.level + 1)")
-                                    .font(.subheadline)
+                    if let user = user {
+                        Text(user.username)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(ColorSchemes.tertiaryColor)
+                        
+                        
+                        // Levels + Exp of User
+                        VStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("Level \(user.level)")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Text("Next: Level \(user.level + 1)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                ProgressView(value: user.expProgress)
+                                    .tint(.orange)
+                                
+                                Text("\(user.completedTasksIntoCurrentLevel)/\(user.tasksRequiredInCurrentLevel) tasks")
+                                    .font(.caption)
                                     .foregroundColor(.secondary)
                             }
-
-                            ProgressView(value: user.expProgress)
-                                .tint(.orange)
-
-                            Text("\(user.completedTasksIntoCurrentLevel)/\(user.tasksRequiredInCurrentLevel) tasks")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            
+                            HStack {
+                                Text("Dogs Collected")
+                                Spacer()
+                                Text("\(user.collectedDogs.count)")
+                                    .fontWeight(.semibold)
+                            }
+                            
+                            HStack {
+                                Text("Total Tasks Completed")
+                                Spacer()
+                                Text("\(user.completedTaskCount)")
+                                    .fontWeight(.semibold)
+                            }
                         }
-
-                        HStack {
-                            Text("Dogs Collected")
-                            Spacer()
-                            Text("\(user.collectedDogs.count)")
-                                .fontWeight(.semibold)
-                        }
-
-                        HStack {
-                            Text("Total Tasks Completed")
-                            Spacer()
-                            Text("\(user.completedTaskCount)")
-                                .fontWeight(.semibold)
-                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    } else {
+                        Text("No user profile found.")
+                            .foregroundColor(.secondary)
                     }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                } else {
-                    Text("No user profile found.")
-                        .foregroundColor(.secondary)
+                    
+                    Spacer()
                 }
-
-                Spacer()
             }
             .navigationTitle("Profile")
             .toolbar {
