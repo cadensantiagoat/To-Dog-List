@@ -1,6 +1,27 @@
 import SwiftUI
 
-struct ContentView: View {
+//NAVBAR
+struct ContentView: View{
+    var body: some View {
+        TabView{
+            TaskListView()
+                .tabItem{
+                    Label("Tasks", systemImage: "checklist")
+                }
+            DogCollectionView()
+                .tabItem{
+                    Label("Dogs", systemImage: "pawprint.fill")
+                }
+            ProfileView()
+                .tabItem{
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+        }
+    }
+}
+
+//
+struct TaskListView: View {
     @State private var tasks: [TodoistTask] = []
     @State private var newTaskContent = ""
     @State private var isLoading = false
