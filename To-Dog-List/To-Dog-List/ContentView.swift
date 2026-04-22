@@ -36,6 +36,7 @@ struct TaskListView: View {
     
     // Delete state
     @State private var deletingTaskId: String? = nil
+    @State private var latestRewardDog: CollectedDog?
 
     var body: some View {
         NavigationView {
@@ -120,6 +121,51 @@ struct TaskListView: View {
         } message: { task in
             Text("Update \"\(task.content)\"")
         }
+        .sheet(item: $latestRewardDog) { dog in
+            VStack(spacing: 16) {
+                Text("New Dog Unlocked!")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                if let imageURL = dog.imageURL, let url = URL(string: imageURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .frame(width: 220, height: 220)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 220, height: 220)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                        case .failure:
+                            ProgressView()
+                                .frame(width: 220, height: 220)
+                        @unknown default:
+                            ProgressView()
+                                .frame(width: 220, height: 220)
+                        }
+                    }
+                }
+
+                Text(dog.name)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+
+                Text("\(dog.rarity.displayName) Rarity")
+                    .font(.headline)
+                    .foregroundColor(colorForRarity(dog.rarity))
+
+                Button("Awesome!") {
+                    latestRewardDog = nil
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 8)
+            }
+            .padding(24)
+            .presentationDetents([.medium])
+        }
     }
 
     // MARK: - Networking
@@ -182,6 +228,9 @@ struct TaskListView: View {
                         )
                         tasks[index] = toggledTask
                     }
+                    if !task.isCompleted {
+                        handleTaskCompletionReward(taskID: task.id)
+                    }
                 case .failure(let error):
                     errorMessage = error.localizedDescription
                     showErrorAlert = true
@@ -243,6 +292,34 @@ struct TaskListView: View {
                     showErrorAlert = true
                 }
             }
+        }
+    }
+
+    private func handleTaskCompletionReward(taskID: String) {
+        guard let user = UserDatabase.shared.getLoggedInUser() else { return }
+        guard let progress = UserDatabase.shared.recordTaskCompletion(taskID: taskID, for: user.username) else {
+            return
+        }
+        guard progress.didLevelUp else { return }
+
+        let rarity = Dogbox.rollRarity()
+        DogAPIManager.shared.fetchRandomDog { dogResult in
+            DispatchQueue.main.async {
+                let reward = CollectedDog(name: dogResult.breed, rarity: rarity, imageURL: dogResult.imageURL)
+                UserDatabase.shared.addDogToCollection(reward, for: user.username)
+                latestRewardDog = reward
+            }
+        }
+    }
+
+    private func colorForRarity(_ rarity: DogRarity) -> Color {
+        switch rarity {
+        case .common:
+            return .gray
+        case .rare:
+            return .blue
+        case .epic:
+            return .purple
         }
     }
 }

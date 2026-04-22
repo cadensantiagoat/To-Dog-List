@@ -24,19 +24,39 @@ struct ProfileView: View {
                     Text(user.username)
                         .font(.title)
                         .fontWeight(.bold)
-
+                    
+                    
+                    // Levels + Exp of User
                     VStack(spacing: 12) {
-                        HStack {
-                            Text("Points")
-                            Spacer()
-                            Text("\(user.points)")
-                                .fontWeight(.semibold)
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Level \(user.level)")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                Text("Next: Level \(user.level + 1)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            ProgressView(value: user.expProgress)
+                                .tint(.orange)
+
+                            Text("\(user.completedTasksIntoCurrentLevel)/\(user.tasksRequiredInCurrentLevel) tasks")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
 
                         HStack {
                             Text("Dogs Collected")
                             Spacer()
                             Text("\(user.collectedDogs.count)")
+                                .fontWeight(.semibold)
+                        }
+
+                        HStack {
+                            Text("Total Tasks Completed")
+                            Spacer()
+                            Text("\(user.completedTaskCount)")
                                 .fontWeight(.semibold)
                         }
                     }

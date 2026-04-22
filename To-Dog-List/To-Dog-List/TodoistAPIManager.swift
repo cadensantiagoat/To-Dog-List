@@ -7,7 +7,7 @@ class TodoistAPIManager {
     private let baseURL = "https://api.todoist.com/api/v1/"
     
     // Test Access Token
-    private let apiToken = todoistAPIKey
+    private let apiToken = "aded5eefba4dcec9efc1d12169dd6c1a329838bf"
     
     // MARK: -Fetch the Tasks
     /// Fetches the user's active tasks from Todoist

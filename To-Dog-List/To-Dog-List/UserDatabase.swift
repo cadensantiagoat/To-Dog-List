@@ -1,6 +1,6 @@
 // UserDatabase.swift: handles the persistent storage like registering users,
-// logging in, saving who's logged in between app launches, and adding dogs
-// to a collection with points.
+// logging in, saving who's logged in between app launches, progressing levels,
+// and adding dogs to a collection.
 
 
 import Foundation
@@ -53,16 +53,46 @@ class UserDatabase {
         UserDefaults.standard.removeObject(forKey: loggedInUserKey)
     }
     
-    // Add a dog breed to the user's collection and award points
-    func addDogToCollection(breed: String, for username: String) {
+    struct TaskCompletionProgress {
+        let didLevelUp: Bool
+        let newLevel: Int
+    }
+
+    // Record one unique task completion. Duplicate task IDs are ignored.
+    func recordTaskCompletion(taskID: String, for username: String) -> TaskCompletionProgress? {
+        var users = getAllUsers()
+        guard let index = users.firstIndex(where: { $0.username == username }) else {
+            return nil
+        }
+
+        if users[index].completedTaskIDs.contains(taskID) {
+            return TaskCompletionProgress(didLevelUp: false, newLevel: users[index].level)
+        }
+
+        users[index].completedTaskIDs.append(taskID)
+        users[index].completedTaskCount += 1
+
+        let oldLevel = users[index].level
+        let updatedLevel = User.level(forTotalCompletedTasks: users[index].completedTaskCount)
+        users[index].level = updatedLevel
+
+        saveAllUsers(users)
+        setLoggedInUser(users[index])
+
+        return TaskCompletionProgress(
+            didLevelUp: updatedLevel > oldLevel,
+            newLevel: updatedLevel
+        )
+    }
+
+    // Add a dog to the user's collection.
+    // Duplicate rewards are allowed to keep the "gacha" feel.
+    func addDogToCollection(_ dog: CollectedDog, for username: String) {
         var users = getAllUsers()
         if let index = users.firstIndex(where: { $0.username == username }) {
-            if !users[index].collectedDogs.contains(breed) {
-                users[index].collectedDogs.append(breed)
-                users[index].points += 10
-                saveAllUsers(users)
-                setLoggedInUser(users[index])
-            }
+            users[index].collectedDogs.append(dog)
+            saveAllUsers(users)
+            setLoggedInUser(users[index])
         }
     }
     

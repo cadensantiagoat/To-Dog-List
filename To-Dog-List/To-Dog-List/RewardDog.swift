@@ -2,66 +2,87 @@
 
 import Foundation
 
-enum DogRarity: CaseIterable {
+enum DogRarity: String, CaseIterable, Codable, Hashable {
     case common, rare, epic
+
+    var displayName: String {
+        rawValue.capitalized
+    }
 }
 
-struct Dog {
+struct DogReward {
     let name: String
     let rarity: DogRarity
+    let imageURL: String?
+}
+
+private struct RandomDogResponse: Decodable {
+    let message: String
+}
+
+final class DogAPIManager {
+    static let shared = DogAPIManager()
+    private let randomDogEndpoint = "https://dog.ceo/api/breeds/image/random"
+
+    func fetchRandomDog(completion: @escaping ((breed: String, imageURL: String)) -> Void) {
+        guard let url = URL(string: randomDogEndpoint) else { return }
+        fetchRandomDog(from: url, completion: completion)
+    }
+
+    private func fetchRandomDog(from url: URL, completion: @escaping ((breed: String, imageURL: String)) -> Void) {
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            if let error = error {
+                print("Dog fetch failed, retrying: \(error.localizedDescription)")
+                self.retryFetch(url: url, completion: completion)
+                return
+            }
+
+            guard let data = data else {
+                self.retryFetch(url: url, completion: completion)
+                return
+            }
+
+            do {
+                let response = try JSONDecoder().decode(RandomDogResponse.self, from: data)
+                let breed = Self.extractBreed(from: response.message)
+                completion((breed: breed, imageURL: response.message))
+            } catch {
+                print("Dog decode failed, retrying: \(error.localizedDescription)")
+                self.retryFetch(url: url, completion: completion)
+            }
+        }.resume()
+    }
+
+    private func retryFetch(url: URL, completion: @escaping ((breed: String, imageURL: String)) -> Void) {
+        DispatchQueue.global().asyncAfter(deadline: .now() + 0.4) {
+            self.fetchRandomDog(from: url, completion: completion)
+        }
+    }
+
+    private static func extractBreed(from imageURL: String) -> String {
+        guard let url = URL(string: imageURL) else { return "Unknown Dog" }
+        let parts = url.pathComponents
+        guard let breedsIndex = parts.firstIndex(of: "breeds"), breedsIndex + 1 < parts.count else {
+            return "Unknown Dog"
+        }
+
+        let breedIdentifier = parts[breedsIndex + 1]
+        let breedParts = breedIdentifier.split(separator: "-").map { $0.capitalized }
+        return breedParts.joined(separator: " ")
+    }
 }
 
 struct Dogbox {
-    static func generateDog() -> Dog {
+    static func rollRarity() -> DogRarity {
         let roll = Int.random(in: 1...50)
-        
-        let rarity: DogRarity
-        
+
         switch roll {
         case 1...33:
-            rarity = .common
-        case 33...47:
-            rarity = .rare
+            return .common
+        case 34...47:
+            return .rare
         default:
-            rarity = .epic
+            return .epic
         }
-        
-        return randomDog(for: rarity)
-    }
-    
-    static func randomDog(for rarity: DogRarity) -> Dog {
-        let dogsByRarity: [DogRarity: [Dog]] = [
-            
-            .common: [
-                Dog(name: "Beagle", rarity: .common),
-                Dog(name: "Corgi", rarity: .common),
-                Dog(name: "Pug", rarity: .common),
-                Dog(name: "Dachshund", rarity: .common),
-                Dog(name: "Chihuahua", rarity: .common),
-                Dog(name: "Doberman", rarity: .common),
-                Dog(name: "Bulldog", rarity: .common),
-                Dog(name: "German Shepherd", rarity: .common),
-                Dog(name: "Boston Terrier", rarity: .common),
-                Dog(name: "Mini Pinscher", rarity: .common),
-                Dog(name: "Husky", rarity: .common),
-                Dog(name: "Golden Retriever", rarity: .common)
-            ],
-            
-            .rare: [
-                Dog(name: "Husky", rarity: .rare),
-                Dog(name: "Dalmatian", rarity: .rare),
-                Dog(name: "Akita", rarity: .rare),
-                Dog(name: "Water Dog", rarity: .rare),
-                Dog(name: "Fire Dog", rarity: .rare),
-                Dog(name: "Grass Dog", rarity: .rare)
-            ],
-            
-            .epic: [
-                Dog(name: "Dragon Dog", rarity: .epic),
-                Dog(name: "Phoenix Dog", rarity: .epic)
-            ]
-        ]
-        
-        return dogsByRarity[rarity]!.randomElement()!
     }
 }

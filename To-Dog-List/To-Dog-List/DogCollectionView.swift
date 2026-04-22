@@ -24,8 +24,41 @@ struct DogCollectionView: View {
                     .fontWeight(.bold)
 
                 if let user = user, !user.collectedDogs.isEmpty {
-                    List(user.collectedDogs, id: \.self) { dog in
-                        Text(dog)
+                    List(user.collectedDogs) { dog in
+                        HStack(spacing: 12) {
+                            if let imageURL = dog.imageURL, let url = URL(string: imageURL) {
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(width: 64, height: 64)
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 64, height: 64)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    case .failure:
+                                        ProgressView()
+                                            .frame(width: 64, height: 64)
+                                    @unknown default:
+                                        ProgressView()
+                                            .frame(width: 64, height: 64)
+                                    }
+                                }
+                            } else {
+                                fallbackDogImage
+                            }
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(dog.name)
+                                    .font(.headline)
+                                Text(dog.rarity.displayName)
+                                    .font(.subheadline)
+                                    .foregroundColor(colorForRarity(dog.rarity))
+                            }
+                        }
+                        .padding(.vertical, 6)
                     }
                 } else {
                     Spacer()
@@ -43,6 +76,25 @@ struct DogCollectionView: View {
             .onAppear {
                 user = UserDatabase.shared.getLoggedInUser()
             }
+        }
+    }
+
+    private var fallbackDogImage: some View {
+        Image(systemName: "pawprint.circle.fill")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 64, height: 64)
+            .foregroundColor(.orange)
+    }
+
+    private func colorForRarity(_ rarity: DogRarity) -> Color {
+        switch rarity {
+        case .common:
+            return .gray
+        case .rare:
+            return .blue
+        case .epic:
+            return .purple
         }
     }
 }
