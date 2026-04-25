@@ -59,8 +59,13 @@ struct DogCollectionView: View {
                                     Text(dog.name)
                                         .font(.headline)
                                     Text(dog.rarity.displayName)
-                                        .font(.subheadline)
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(colorForRarity(dog.rarity).opacity(0.2))
                                         .foregroundColor(colorForRarity(dog.rarity))
+                                        .cornerRadius(8)
                                 }
                             }
                             .padding(.vertical, 6)
