@@ -6,6 +6,8 @@ struct LoginView: View {
     @State private var errorMessage = ""
     @State private var isLoggedIn = false
     @State private var showError = false
+    @State private var pulseOpacity: Double = 0
+    @State private var errorScale: CGFloat = 1.0
 
     var body: some View {
         if isLoggedIn {
@@ -55,8 +57,21 @@ struct LoginView: View {
                     // MARK: - Error Message
                     if showError {
                         Text(errorMessage)
-                            .foregroundColor(.red)
+                            .foregroundColor(.white)
                             .font(.caption)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.red.opacity(0.85))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.red, lineWidth: 1.5)
+                                    .opacity(pulseOpacity)
+                            )
+                            .scaleEffect(errorScale)
+                            .transition(.scale(scale: 0.8).combined(with: .opacity))
+                            .animation(.spring(response: 0.4, dampingFraction: 0.5), value: showError)
                     }
                     
                     // MARK: - Login Button
@@ -94,6 +109,7 @@ struct LoginView: View {
         guard !username.isEmpty, !password.isEmpty else {
             errorMessage = "Please enter a username and password."
             showError = true
+            shakeError()
             return
         }
         if let user = UserDatabase.shared.loginUser(username: username, password: password) {
@@ -103,6 +119,30 @@ struct LoginView: View {
         } else {
             errorMessage = "Invalid username or password."
             showError = true
+            shakeError()
+        }
+    }
+    
+    private func shakeError() {
+        // Pop in
+        errorScale = 0.8
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.4)) {
+            errorScale = 1.05
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeOut(duration: 0.15)) {
+                errorScale = 1.0
+            }
+        }
+
+        // Pulse glow
+        withAnimation(.easeIn(duration: 0.2)) {
+            pulseOpacity = 1.0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeOut(duration: 0.6).repeatCount(2, autoreverses: true)) {
+                pulseOpacity = 0.2
+            }
         }
     }
     
@@ -111,6 +151,7 @@ struct LoginView: View {
         guard !username.isEmpty, !password.isEmpty else {
             errorMessage = "Please enter a username and password."
             showError = true
+            shakeError()
             return
         }
         let success = UserDatabase.shared.registerUser(username: username, password: password)
@@ -123,6 +164,7 @@ struct LoginView: View {
         } else {
             errorMessage = "Username already taken. Please choose a different username."
             showError = true
+            shakeError()
         }
     }
 }
