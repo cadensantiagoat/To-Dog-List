@@ -62,7 +62,7 @@ struct TaskListView: View {
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                    .background(Color(.systemBackground))
+                    .background(ColorSchemes.backgroundColor)
                     
                     Divider()
                     
@@ -70,6 +70,7 @@ struct TaskListView: View {
                     if isLoading && tasks.isEmpty {
                         Spacer()
                         ProgressView("Loading tasks…")
+                            .foregroundColor(.white)
                         Spacer()
                     } else {
                         List {
@@ -94,8 +95,14 @@ struct TaskListView: View {
                     }
                 }
             }
-            .navigationTitle("To‑Dog List")
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("To-Dog List")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.top, 100)
+                        .foregroundColor(ColorSchemes.primaryColor)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         Task { await loadTasks() }
@@ -106,7 +113,13 @@ struct TaskListView: View {
                 }
             }
         }
+        .toolbarBackground(.visible, for: .navigationBar)
         .onAppear {
+            if UserDatabase.shared.getLoggedInUser() == nil {
+                 tasks = []
+                 return
+            }
+
             Task { await loadTasks() }
         }
         .alert("Error", isPresented: $showErrorAlert, presenting: errorMessage) { _ in

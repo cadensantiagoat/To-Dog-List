@@ -21,14 +21,12 @@ struct SettingsView: View {
                     .resizable()
                     .frame(width: 70, height: 70)
                     .foregroundColor(ColorSchemes.primaryColor)
-                    .padding(.top, 20)
+                    .padding(.top, 200)
 
                 Text("Settings")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(ColorSchemes.tertiaryColor)
-
-                Spacer()
                 
                 Text("More settings coming soon.")
                     .foregroundColor(ColorSchemes.tertiaryColor.opacity(0.5))
@@ -61,7 +59,6 @@ struct SettingsView: View {
                 }
             }
         }
-        .navigationTitle("Settings")
         .fullScreenCover(isPresented: $isLoggedOut) {
             LoginView()
         }

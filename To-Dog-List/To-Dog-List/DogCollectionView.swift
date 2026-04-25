@@ -16,18 +16,23 @@ struct DogCollectionView: View {
                 ColorSchemes.backgroundColor
                     .ignoresSafeArea()
                 
-                VStack(spacing: 16) {
-                    Image(systemName: "pawprint.circle.fill")
-                        .resizable()
-                        .frame(width: 90, height: 90)
-                        .foregroundColor(ColorSchemes.primaryColor)
-                        .padding(.top, 20)
+                VStack (spacing: 0) {
                     
-                    Text("My Dogs")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(ColorSchemes.tertiaryColor)
-                        .padding(.bottom)
+                    VStack(spacing: 16) {
+                        Image(systemName: "pawprint.circle.fill")
+                            .resizable()
+                            .frame(width: 100, height: 100)
+                            .foregroundColor(ColorSchemes.primaryColor)
+                            .padding(.top, 20)
+                        
+                        Text("My Collection")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(ColorSchemes.tertiaryColor)
+                            .padding(.bottom)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .background(ColorSchemes.backgroundColor)
                     
                     if let user = user, !user.collectedDogs.isEmpty {
                         List(user.collectedDogs) { dog in
@@ -59,7 +64,6 @@ struct DogCollectionView: View {
                                     Text(dog.name)
                                         .font(.headline)
                                     Text(dog.rarity.displayName)
-                                        .font(.caption)
                                         .fontWeight(.semibold)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 3)
@@ -70,23 +74,22 @@ struct DogCollectionView: View {
                             }
                             .padding(.vertical, 6)
                         }
+                        .scrollContentBackground(.hidden)
                     } else {
-                        Spacer()
+                        Spacer().frame(height: 200)
                         Text("No dogs collected yet.")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(ColorSchemes.tertiaryColor)
                         Text("Complete tasks to start building your dog collection.")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(ColorSchemes.tertiaryColor)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                         Spacer()
                     }
                 }
-                .navigationTitle("Dogs")
-                .onAppear {
-
-                    user = UserDatabase.shared.getLoggedInUser()
-                }
+            }
+            .onAppear {
+                user = UserDatabase.shared.getLoggedInUser()
             }
         }
     }

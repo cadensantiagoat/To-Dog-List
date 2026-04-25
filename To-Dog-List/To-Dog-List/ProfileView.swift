@@ -77,7 +77,6 @@ struct ProfileView: View {
                     Spacer()
                 }
             }
-            .navigationTitle("Profile")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: SettingsView()) {
